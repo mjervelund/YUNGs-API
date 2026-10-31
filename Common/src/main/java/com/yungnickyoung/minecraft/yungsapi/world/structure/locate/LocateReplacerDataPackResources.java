@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * A runtime datapack which adds structures replaced with {@link com.yungnickyoung.minecraft.yungsapi.api.world.structure.locate.LocateReplacer}
  * to the {@code c:hidden_from_locator_selection} tag, so that they don't show up in menus for mods such as Explorer's Compass.
  */
-public class LocateReplacerDataPackResources extends AbstractPackResources {
+public class LocateReplacerDataPackResources extends AbstractPackMetadataResources implements PackResources {
     private static final Identifier TAG_LOCATION = Identifier.fromNamespaceAndPath("c", "tags/worldgen/structure/hidden_from_locator_selection.json");
     private static final String[] TAG_FULL_PATH = Util.make(new ArrayList<String>(), s -> {
         s.add("data");
@@ -90,7 +90,7 @@ public class LocateReplacerDataPackResources extends AbstractPackResources {
     }
 
     @Override
-    public void listResources(PackType packType, String namespace, String pathPrefix, ResourceOutput output) {
+    public void listResources(PackType packType, String namespace, String pathPrefix, PackResources.ResourceOutput output) {
         if (packType != PACK_TYPE) {
             return;
         }
@@ -122,13 +122,13 @@ public class LocateReplacerDataPackResources extends AbstractPackResources {
             var packResources = new LocateReplacerDataPackResources();
             var pack = Pack.readMetaAndCreate(packResources.location(), new Pack.ResourcesSupplier() {
                 @Override
-                public PackResources openPrimary(PackLocationInfo packLocationInfo) {
+                public PackMetadataResources openMetadata(PackLocationInfo packLocationInfo) {
                     return packResources;
                 }
 
                 @Override
-                public PackResources openFull(PackLocationInfo packLocationInfo, Pack.Metadata metadata) {
-                    return packResources;
+                public java.util.stream.Stream<PackResources> openResources(PackLocationInfo packLocationInfo, Pack.Metadata metadata) {
+                    return java.util.stream.Stream.of(packResources);
                 }
             }, PackType.SERVER_DATA, new PackSelectionConfig(true, Pack.Position.TOP, true));
             if (pack != null) {

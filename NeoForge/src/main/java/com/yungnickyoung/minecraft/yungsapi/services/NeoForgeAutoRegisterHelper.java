@@ -80,7 +80,7 @@ public class NeoForgeAutoRegisterHelper implements IAutoRegisterHelper {
 
                     // Queue for registration
                     String name = (String) data.annotationData().get("value");
-                    AutoRegisterField autoRegisterField = new AutoRegisterField(o, Identifier.fromNamespaceAndPath(modId, name));
+                    AutoRegisterField autoRegisterField = new AutoRegisterField(o, Identifier.fromNamespaceAndPath(modId, name), f.getGenericType());
                     AutoRegisterFieldRouter.queueField(autoRegisterField);
                 });
     }

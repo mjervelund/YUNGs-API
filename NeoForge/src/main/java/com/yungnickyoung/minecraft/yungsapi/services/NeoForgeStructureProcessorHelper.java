@@ -18,10 +18,9 @@ import java.util.function.Function;
 
 public class NeoForgeStructureProcessorHelper implements IStructureProcessorHelper {
     @Override
-    public StructureProcessorType<StructureProcessor> createStructureProcessorType(final Function<ValueInput, Optional<StructureEntityProcessorBuilder.Processor>> function) {
+    public MapCodec<StructureProcessor> createStructureProcessorType(final Function<ValueInput, Optional<StructureEntityProcessorBuilder.Processor>> function) {
         var processor = new StructureProcessor() {
             private final MapCodec<StructureProcessor> codec = MapCodec.unit(this);
-            private final StructureProcessorType<StructureProcessor> type = () -> this.codec;
 
             @Override public StructureTemplate.StructureEntityInfo processEntity(
                     final LevelReader world,
@@ -42,10 +41,10 @@ public class NeoForgeStructureProcessorHelper implements IStructureProcessorHelp
                 }).orElse(entityInfo);
             }
 
-            @Override protected StructureProcessorType<?> getType() {
-                return this.type;
+            @Override public MapCodec<? extends StructureProcessor> codec() {
+                return this.codec;
             }
         };
-        return processor.type;
+        return processor.codec;
     }
 }

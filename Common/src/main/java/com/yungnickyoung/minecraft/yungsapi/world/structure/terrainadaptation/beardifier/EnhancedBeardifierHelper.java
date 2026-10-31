@@ -2,14 +2,11 @@ package com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.b
 
 import com.yungnickyoung.minecraft.yungsapi.mixin.BeardifierMixin;
 import com.yungnickyoung.minecraft.yungsapi.mixin.accessor.BeardifierAccessor;
-import com.yungnickyoung.minecraft.yungsapi.mixin.accessor.NoiseChunkAccessor;
 import com.yungnickyoung.minecraft.yungsapi.world.structure.YungJigsawStructure;
 import com.yungnickyoung.minecraft.yungsapi.world.structure.jigsaw.element.YungJigsawPoolElement;
 import com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.adaptations.EnhancedTerrainAdaptation;
 import com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.adaptations.NoneAdaptation;
 import com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.aquiferoverride.AquiferOverride;
-import com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.aquiferoverride.AquiferOverrideMask;
-import com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.aquiferoverride.AquiferOverrideMaskSupplier;
 import com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.aquiferoverride.NoneAquiferOverride;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -18,8 +15,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Beardifier;
-import net.minecraft.world.level.levelgen.DensityFunction;
-import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -45,7 +40,7 @@ public class EnhancedBeardifierHelper {
         ObjectList<EnhancedJigsawJunction> enhancedJunctionList = new ObjectArrayList<>(10);
         int chunkMinBlockX = chunkPos.getMinBlockX();
         int chunkMinBlockZ = chunkPos.getMinBlockZ();
-        List<StructureStart> structureStarts = structureManager.startsForStructure(chunkPos, structure -> structure instanceof YungJigsawStructure);
+        List<StructureStart> structureStarts = structureManager.startsForStructure(chunkPos.x(), chunkPos.z(), structure -> structure instanceof YungJigsawStructure);
         for (StructureStart structureStart : structureStarts) {
             EnhancedTerrainAdaptation structureTerrainAdaptation = ((YungJigsawStructure) structureStart.getStructure()).enhancedTerrainAdaptation;
 
@@ -121,6 +116,14 @@ public class EnhancedBeardifierHelper {
             }
         }
 
+        // Nothing to add for this chunk: leave vanilla's Beardifier (possibly the shared EMPTY instance) untouched.
+        if (enhancedBeardifierRigidList.isEmpty() && enhancedJunctionList.isEmpty()) {
+            return original;
+        }
+        // Never attach data to the shared EMPTY instance.
+        if (original == Beardifier.EMPTY) {
+            original = new Beardifier(List.of(), List.of(), null);
+        }
         EnhancedBeardifierData enhancedBeardifier = (EnhancedBeardifierData) original;
         enhancedBeardifier.yungsapi_setEnhancedPieces(enhancedBeardifierRigidList);
         enhancedBeardifier.yungsapi_setEnhancedJunctions(enhancedJunctionList);
@@ -129,15 +132,12 @@ public class EnhancedBeardifierHelper {
 
     /**
      * Computes the updated density value at the given point, accounting for noise contributions from the EnhancedBeardifierData.
-     * @param ctx the density FunctionContext
+     * @param x,y,z the block position being sampled
      * @param density The originally computed vanilla density value at this position
      * @param data The {@link EnhancedBeardifierData} to be used in the computation of the new density value.
      * @return The new density value at the given location, accounting for additional noise contributions.
      */
-    public static double computeDensity(DensityFunction.FunctionContext ctx, double density, EnhancedBeardifierData data) {
-        int x = ctx.blockX();
-        int y = ctx.blockY();
-        int z = ctx.blockZ();
+    public static double computeDensity(int x, int y, int z, double density, EnhancedBeardifierData data) {
         AquiferOverride aquiferOverride = NoneAquiferOverride.INSTANCE;
 
         var pieceIterator = data.yungsapi_getEnhancedPieceIterator();
@@ -221,29 +221,6 @@ public class EnhancedBeardifierHelper {
             }
         }
 
-        // Set the aquifer override mask for this position if the density was modified and if
-        // the relevant EnhancedTerrainAdaptation specifies that it should override aquifer liquids.
-        if (aquiferOverride != NoneAquiferOverride.INSTANCE) {
-            updateAquiferOverrideMask(data, aquiferOverride, x, y, z);
-        }
-
         return density;
-    }
-
-    private static void updateAquiferOverrideMask(EnhancedBeardifierData data, AquiferOverride aquiferOverride, int x, int y, int z) {
-        NoiseChunk noiseChunk = data.yungsapi_getNoiseChunk();
-        NoiseChunkAccessor noiseChunkAccessor = (NoiseChunkAccessor) noiseChunk;
-        AquiferOverrideMaskSupplier aquiferOverrideMaskSupplier = (AquiferOverrideMaskSupplier) noiseChunk;
-
-        int cellHeight = noiseChunkAccessor.getCellHeight();
-        int cellCountY = noiseChunkAccessor.getCellCountY();
-        int cellNoiseMinY = noiseChunkAccessor.getCellNoiseMinY();
-
-        int chunkHeight = cellCountY * cellHeight;
-        int minY = cellNoiseMinY * cellHeight;
-
-        AquiferOverrideMask aquiferOverrideMask = aquiferOverrideMaskSupplier.getOrCreateAquiferOverrideMask(() -> new AquiferOverrideMask(chunkHeight, minY));
-        aquiferOverrideMask.set(x, y, z);
-        aquiferOverrideMask.setAquiferOverride(aquiferOverride);
     }
 }

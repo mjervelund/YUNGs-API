@@ -3,7 +3,6 @@ package com.yungnickyoung.minecraft.yungsapi.world.structure.terrainadaptation.b
 import com.yungnickyoung.minecraft.yungsapi.mixin.BeardifierMixin;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
-import net.minecraft.world.level.levelgen.NoiseChunk;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -17,7 +16,4 @@ public interface EnhancedBeardifierData {
 
     @Nullable ObjectListIterator<EnhancedJigsawJunction> yungsapi_getEnhancedJunctionIterator();
     void yungsapi_setEnhancedJunctions(ObjectList<EnhancedJigsawJunction> enhancedJunctions);
-
-    @Nullable NoiseChunk yungsapi_getNoiseChunk();
-    void yungsapi_setNoiseChunk(NoiseChunk noiseChunk);
 }

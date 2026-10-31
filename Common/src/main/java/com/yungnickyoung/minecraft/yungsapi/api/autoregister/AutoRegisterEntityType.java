@@ -71,7 +71,7 @@ public class AutoRegisterEntityType<T extends Entity> extends AutoRegisterEntry<
     public static class Builder<T extends Entity> {
         private final EntityType.EntityFactory<T> factory;
         private final MobCategory category;
-        private ImmutableSet<Block> immuneTo = ImmutableSet.of();
+        private net.minecraft.tags.TagKey<Block> immuneTo = net.minecraft.tags.BlockTags.DEFAULT_IMMUNE_TO;
         private boolean serialize = true;
         private boolean summon = true;
         private boolean fireImmune;
@@ -169,8 +169,8 @@ public class AutoRegisterEntityType<T extends Entity> extends AutoRegisterEntry<
             return this;
         }
 
-        public Builder<T> immuneTo(Block... blocks) {
-            this.immuneTo = ImmutableSet.copyOf(blocks);
+        public Builder<T> immuneTo(net.minecraft.tags.TagKey<Block> blocks) {
+            this.immuneTo = blocks;
             return this;
         }
 
@@ -220,7 +220,8 @@ public class AutoRegisterEntityType<T extends Entity> extends AutoRegisterEntry<
                     this.descriptionId.get(resourceKey),
                     this.lootTable.get(resourceKey),
                     this.requiredFeatures,
-                    this.allowedInPeaceful
+                    this.allowedInPeaceful,
+                    true // trackDeltas (vanilla builder default)
             );
         }
     }

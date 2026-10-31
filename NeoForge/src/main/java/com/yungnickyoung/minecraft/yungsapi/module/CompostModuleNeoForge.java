@@ -20,8 +20,9 @@ public class CompostModuleNeoForge {
      * during CommonSetup.
      */
     public static void registerCompostables() {
-        // TODO ComposterBlock.COMPOSTABLES will be deprecated,
-        //  move to using json (see NeoForgeDataMaps.COMPOSTABLES) or switch to RegisterEvent
-        ComposterBlock.COMPOSTABLES.putAll(COMPOSTABLES);
+        // 26.3 removed ComposterBlock.COMPOSTABLES (compostables are an item data component / data map now); not ported.
+        if (!COMPOSTABLES.isEmpty()) {
+            com.yungnickyoung.minecraft.yungsapi.YungsApiCommon.LOGGER.warn("YUNG's API: {} compostable item(s) queued via AutoRegisterUtils were ignored (not supported on 26.3 yet)", COMPOSTABLES.size());
+        }
     }
 }

@@ -50,6 +50,6 @@ public class MaxCountFeaturePoolElement extends FeaturePoolElement implements IM
     }
 
     public String toString() {
-        return "MaxCountFeature[" + this.name + "][" + BuiltInRegistries.FEATURE.getKey((((FeaturePoolElementAccessor)this).getFeature().value()).feature().value().feature()) + "][" + this.maxCount + "]";
+        return "MaxCountFeature[" + this.name + "][" + BuiltInRegistries.FEATURE_TYPE.getKey((((FeaturePoolElementAccessor)this).getFeature().value()).feature().value().codec()) + "][" + this.maxCount + "]";
     }
 }

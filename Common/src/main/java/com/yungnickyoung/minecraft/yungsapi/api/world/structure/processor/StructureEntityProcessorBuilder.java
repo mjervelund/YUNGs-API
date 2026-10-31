@@ -326,7 +326,7 @@ public final class StructureEntityProcessorBuilder<F> implements App<StructureEn
             Function<Item, Function<RandomSource, Item>> helmetMap) {
         return seq(
                 guard(
-                        onlyIf(is(EntityType.ARMOR_STAND)),
+                        onlyIf(is(net.minecraft.world.entity.EntityTypes.ARMOR_STAND)),
                         processor(instance -> instance.group(
                                 extract(EntityEquipment.CODEC.fieldOf("equipment"))
                                         .map(eq -> eq.get(EquipmentSlot.HEAD).getItem())
@@ -352,7 +352,7 @@ public final class StructureEntityProcessorBuilder<F> implements App<StructureEn
     public static StructureEntityProcessorBuilder<Processor> createItemFrameProcessor(Function<Item, Function<RandomSource, Item>> map) {
         return seq(
                 guard(
-                        onlyIf(is(EntityType.ITEM_FRAME)),
+                        onlyIf(is(net.minecraft.world.entity.EntityTypes.ITEM_FRAME)),
                         processor(instance -> instance.group(
                                 extract(ItemStackTemplate.CODEC.fieldOf("Item"))
                                         .map(ist -> map.apply(ist.item().value()))
@@ -398,7 +398,7 @@ public final class StructureEntityProcessorBuilder<F> implements App<StructureEn
      * @param builder   the builder
      * @return  the StructureProcessorType
      */
-    public static StructureProcessorType<StructureProcessor> build(final StructureEntityProcessorBuilder<Processor> builder) {
+    public static com.mojang.serialization.MapCodec<StructureProcessor> build(final StructureEntityProcessorBuilder<Processor> builder) {
         return Services.STRUCTURE_PROCESSOR_HELPER.createStructureProcessorType(builder.function);
     }
 

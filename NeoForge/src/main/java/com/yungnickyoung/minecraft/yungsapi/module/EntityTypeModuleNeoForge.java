@@ -42,9 +42,7 @@ public class EntityTypeModuleNeoForge {
     private static void registerEntityAttributes(EntityAttributeCreationEvent event) {
         ENTITY_ATTRIBUTES.forEach((entityType, builderSupplier) -> {
             AttributeSupplier.Builder builder = builderSupplier.get();
-            // Attach required Forge attributes and register
-            builder.add(NeoForgeMod.SWIM_SPEED.getDelegate())
-                    .add(NeoForgeMod.NAMETAG_DISTANCE.getDelegate());
+            // (NeoForge 26.3 no longer exposes SWIM_SPEED/NAMETAG_DISTANCE; vanilla provides them.)
             event.put(entityType.get(), builder.build());
         });
     }

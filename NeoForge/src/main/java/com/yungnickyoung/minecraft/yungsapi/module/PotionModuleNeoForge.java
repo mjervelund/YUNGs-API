@@ -18,8 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
-import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +30,8 @@ import java.util.function.Supplier;
  * Registration of Potions and brewing recipes.
  */
 public class PotionModuleNeoForge {
-    public static final List<IBrewingRecipe> BREWING_RECIPES = new ArrayList<>();
+    /** Brewing recipes queued via AutoRegisterUtils. NOTE: NeoForge 26.3 replaced IBrewingRecipe/RegisterBrewingRecipesEvent; registration is not ported yet. */
+    public static final List<BrewingRecipe> BREWING_RECIPES = new ArrayList<>();
 
     public static void processEntries() {
         YungsApiNeoForge.loadingContextEventBus.addListener(YungsApiNeoForge.buildAutoRegistrar(
@@ -42,7 +41,6 @@ public class PotionModuleNeoForge {
                 PotionModuleNeoForge::registerPotion)
         );
 
-        NeoForge.EVENT_BUS.addListener(PotionModuleNeoForge::registerBrewingRecipes);
     }
 
     private static Potion buildPotion(AutoRegisterField data) {
@@ -65,35 +63,6 @@ public class PotionModuleNeoForge {
         ((AutoRegisterPotion) data.object()).setHolder(holder);
     }
 
-    /**
-     * Registers all recipes added with {@link AutoRegisterUtils#registerBrewingRecipe}.
-     * Note that usage of the aforementioned method should be performed in a method annotated
-     * with {@link AutoRegister}. This method is explicitly called after all such methods have been invoked,
-     * during CommonSetup.
-     */
-    private static void registerBrewingRecipes(RegisterBrewingRecipesEvent event) {
-        BREWING_RECIPES.forEach(recipe -> event.getBuilder().addRecipe(recipe));
-    }
-
-    public record BrewingRecipe(Holder<Potion> input, Supplier<Item> ingredient,
-                                Holder<Potion> output) implements IBrewingRecipe {
-        @Override
-        public boolean isInput(ItemStack itemStack) {
-            PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-            return potionContents.is(this.input);
-        }
-
-        @Override
-        public boolean isIngredient(ItemStack itemStack) {
-            return itemStack.getItem() == this.ingredient.get();
-        }
-
-        @Override
-        @ParametersAreNonnullByDefault
-        public @NotNull ItemStack getOutput(ItemStack inputStack, ItemStack ingredientStack) {
-            return isInput(inputStack) && isIngredient(ingredientStack)
-                    ? PotionContents.createItemStack(inputStack.getItem(), (this.output))
-                    : ItemStack.EMPTY;
-        }
+    public record BrewingRecipe(Holder<Potion> input, Supplier<Item> ingredient, Holder<Potion> output) {
     }
 }

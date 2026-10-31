@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface IStructureProcessorHelper {
-    StructureProcessorType<StructureProcessor> createStructureProcessorType(Function<ValueInput, Optional<StructureEntityProcessorBuilder.Processor>> function);
+    com.mojang.serialization.MapCodec<StructureProcessor> createStructureProcessorType(Function<ValueInput, Optional<StructureEntityProcessorBuilder.Processor>> function);
 
     static CompoundTag merge(CompoundTag into, CompoundTag from) {
         for (var entry : from.entrySet()) {
